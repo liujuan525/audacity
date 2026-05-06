@@ -9,6 +9,7 @@
 #include "framework/global/modularity/ioc.h"
 #include "framework/interactive/iinteractive.h"
 #include "framework/actions/iactionsdispatcher.h"
+#include "framework/ui/inavigationcontroller.h"
 
 #include "audio/iaudiodevicesprovider.h"
 #include "context/iglobalcontext.h"
@@ -41,6 +42,7 @@ class TrackeditActionsController : public ITrackeditActionsController, public mu
     muse::ContextInject<trackedit::ISelectionController> selectionController { this };
     muse::ContextInject<trackedit::ITrackeditInteraction> trackeditInteraction { this };
     muse::ContextInject<trackedit::ITrackNavigationController> trackNavigationController { this };
+    muse::ContextInject<muse::ui::INavigationController> navigationController { this };
     muse::ContextInject<spectrogram::IFrequencySelectionController> frequencySelectionController { this };
 
 public:
@@ -79,6 +81,7 @@ private:
     void doGlobalDisjoin();
     void doGlobalDuplicate();
 
+    void doGlobalCutLeaveGap();
     void doGlobalCutPerClipRipple();
     void doGlobalCutPerTrackRipple();
     void doGlobalCutAllTracksRipple();
@@ -88,6 +91,7 @@ private:
     void pasteInsert();
     void pasteInsertRipple();
 
+    void doGlobalDeleteLeaveGap();
     void doGlobalDeletePerClipRipple();
     void doGlobalDeletePerTrackRipple();
     void doGlobalDeleteAllTracksRipple();
@@ -136,6 +140,7 @@ private:
     void toggleStretchClipToMatchTempo(const muse::actions::ActionData& args);
     void openClipPitchAndSpeed();
     void renderClipPitchAndSpeed(const muse::actions::ActionData& args);
+    void resetClipPitchAndSpeed(const muse::actions::ActionData& args);
 
     void swapStereoChannels(const muse::actions::ActionData& args);
     void splitStereoToLR(const muse::actions::ActionData& args);
@@ -155,6 +160,8 @@ private:
     void selectTrackStartToCursor();
     void selectCursorToTrackEnd();
     void selectTrackStartToEnd();
+    void setSelection(const muse::actions::ActionQuery& query);
+    void selectTrackByIndex(const muse::actions::ActionQuery& query);
     void moveCursorToClosestZeroCrossing();
 
     void setClipColor(const muse::actions::ActionQuery& q);
@@ -170,13 +177,8 @@ private:
 
     void addLabel();
 
-    void labelDelete(const muse::actions::ActionData& args);
     void labelDeleteMulti(const muse::actions::ActionData& args);
-
-    void labelCut(const muse::actions::ActionData& args);
     void labelCutMulti(const muse::actions::ActionData& args);
-
-    void labelCopy(const muse::actions::ActionData& args);
     void labelCopyMulti();
 
     void moveFocusedItemLeft();

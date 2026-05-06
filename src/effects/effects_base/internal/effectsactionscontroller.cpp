@@ -9,6 +9,8 @@
 #include "spectrogram/spectrogramtypes.h"
 #include "wx/string.h"
 
+#include "au3-components/EffectAutomationParameters.h"
+
 #include "log.h"
 
 using namespace muse::actions;
@@ -16,7 +18,7 @@ using namespace au::effects;
 
 void EffectsActionsController::init()
 {
-    m_uiActions = std::make_shared<EffectsUiActions>(iocContext(), shared_from_this());
+    m_uiActions = std::make_shared<EffectsUiActions>(iocContext(), this);
 
     effectsProvider()->effectMetaListChanged().onNotify(this, [this](){
         registerActions();
@@ -57,6 +59,7 @@ void EffectsActionsController::registerActions()
     }
 
     dispatcher()->reg(this, "repeat-last-effect", this, &EffectsActionsController::repeatLastEffect);
+    dispatcher()->reg(this, "plugin-manager", this, &EffectsActionsController::openPluginManager);
 
     // presets
     dispatcher()->reg(this, ActionQuery("action://effects/presets/apply"), this, &EffectsActionsController::applyPreset);
@@ -66,6 +69,7 @@ void EffectsActionsController::registerActions()
     dispatcher()->reg(this, ActionQuery("action://effects/presets/import"), this, &EffectsActionsController::importPreset);
     dispatcher()->reg(this, ActionQuery("action://effects/presets/export"), this, &EffectsActionsController::exportPreset);
 
+    dispatcher()->reg(this, ActionQuery("action://effects/apply"), this, &EffectsActionsController::applyEffect);
     dispatcher()->reg(this, ActionQuery("action://effects/toggle_vendor_ui"), this, &EffectsActionsController::toggleVendorUI);
 
     m_uiActions->reload();
@@ -82,6 +86,32 @@ void EffectsActionsController::onEffectTriggered(const muse::actions::ActionQuer
     playbackController()->stop();
 
     effectExecutionScenario()->performEffect(effectId);
+}
+
+void EffectsActionsController::applyEffect(const muse::actions::ActionQuery& q)
+{
+    const EffectId effectId = effectIdFromAction(q);
+    IF_ASSERT_FAILED(!effectId.empty()) {
+        return;
+    }
+
+    CommandParameters eap;
+    for (const auto& [key, val] : q.params()) {
+        if (key == "effectId") {
+            continue;
+        }
+        eap.Write(wxString::FromUTF8(key), wxString::FromUTF8(val.toString()));
+    }
+    wxString params;
+    eap.GetParameters(params);
+
+    LOGI() << "applyEffect: effectId=" << effectId << ", params=" << params.ToStdString(wxConvUTF8);
+
+    playbackController()->stop();
+    const muse::Ret ret = effectExecutionScenario()->performEffect(effectId, params.ToStdString(wxConvUTF8));
+    if (!ret) {
+        LOGE() << "applyEffect failed: effectId=" << effectId << ", code=" << ret.code() << ", text=" << ret.text();
+    }
 }
 
 void EffectsActionsController::repeatLastEffect()
@@ -187,4 +217,9 @@ bool EffectsActionsController::canReceiveAction(const muse::actions::ActionCode&
 muse::async::Channel<muse::actions::ActionCodeList> EffectsActionsController::canReceiveActionsChanged() const
 {
     return m_canReceiveActionsChanged;
+}
+
+void EffectsActionsController::openPluginManager()
+{
+    interactive()->open("audacity://effects/plugin_manager");
 }

@@ -178,7 +178,9 @@ TrackItemsContainer {
                     Component.onCompleted: updateCustomCursor()
                     Connections {
                         target: root
-                        function onSelectionEditInProgressChanged() { clipsContainerMouseArea.updateCustomCursor() }
+                        function onSelectionEditInProgressChanged() {
+                            clipsContainerMouseArea.updateCustomCursor()
+                        }
                     }
 
                     anchors.fill: parent
@@ -258,12 +260,14 @@ TrackItemsContainer {
                         asynchronous: false
 
                         sourceComponent: {
-                            if ((itemData.x + itemData.width) < (0 - clipsModel.cacheBufferPx)) {
-                                return null
-                            }
+                            if (!itemData.focused) {
+                                if ((itemData.x + itemData.width) < (0 - clipsModel.cacheBufferPx)) {
+                                    return null
+                                }
 
-                            if (itemData.x > (clipsContainer.width + clipsModel.cacheBufferPx)) {
-                                return null
+                                if (itemData.x > (clipsContainer.width + clipsModel.cacheBufferPx)) {
+                                    return null
+                                }
                             }
 
                             //! NOTE This optimization is disabled, it is probably not needed,
@@ -308,11 +312,13 @@ TrackItemsContainer {
                                 clipKey: itemData.key
                                 clipTime: itemData.time
                                 pitch: itemData.pitch
+                                isPitchModified: itemData.isPitchModified
 
                                 currentClipStyle: clipsModel.clipStyle
                                 headerHeight: root.headerHeight
 
                                 speedPercentage: itemData.speedPercentage
+                                isSpeedModified: itemData.isSpeedModified
                                 clipSelected: itemData.selected
                                 clipIntersectsSelection: itemData.intersectsSelection
                                 isMultiSelectionActive: root.isMultiSelectionActive
@@ -354,7 +360,7 @@ TrackItemsContainer {
                                 navigation.accessible.name: Boolean(itemData) ? itemData.title : ""
                                 navigation.onActiveChanged: {
                                     if (navigation.active) {
-                                        root.context.insureVisible(root.context.positionToTime(itemData.x))
+                                        root.context.animatedInsureVisible(itemData.time.startTime)
                                         root.insureVerticallyVisible()
                                     }
                                 }

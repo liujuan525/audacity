@@ -66,6 +66,13 @@ UiActionList STATIC_ACTIONS = {
              TranslatableString("action", "Clear selection"),
              TranslatableString("action", "Clear selection")
              ),
+    UiAction("cut-leave-gap",
+             au::context::UiCtxAny,
+             au::context::CTX_ANY,
+             TranslatableString("action", "Cut and leave gap"),
+             TranslatableString("action", "Cut and leave gap"),
+             IconCode::Code::CUT
+             ),
     UiAction("cut-per-clip-ripple",
              au::context::UiCtxAny,
              au::context::CTX_ANY,
@@ -86,6 +93,20 @@ UiActionList STATIC_ACTIONS = {
              TranslatableString("action", "Cut and close gap (all tracks)"),
              TranslatableString("action", "Cut and close gap (all tracks)"),
              IconCode::Code::CUT
+             ),
+    UiAction("delete-leave-gap",
+             au::context::UiCtxAny,
+             au::context::CTX_ANY,
+             TranslatableString("action", "Delete and leave gap"),
+             TranslatableString("action", "Delete and leave gap"),
+             IconCode::Code::DELETE_TANK
+             ),
+    UiAction("delete-per-clip-ripple",
+             au::context::UiCtxAny,
+             au::context::CTX_ANY,
+             TranslatableString("action", "Delete and close gap (per clip)"),
+             TranslatableString("action", "Delete and close gap (per clip)"),
+             IconCode::Code::DELETE_TANK
              ),
     UiAction("delete-per-track-ripple",
              au::context::UiCtxAny,
@@ -170,7 +191,7 @@ UiActionList STATIC_ACTIONS = {
              ),
     UiAction("track-change-rate-custom",
              au::context::UiCtxAny,
-             au::context::CTX_ANY,
+             au::context::CTX_DISABLED,
              TranslatableString("action", "Other…"),
              TranslatableString("action", "Other…"),
              Checkable::Yes
@@ -300,6 +321,12 @@ UiActionList STATIC_ACTIONS = {
              TranslatableString("action", "Render pitch and speed"),
              TranslatableString("action", "Render pitch and speed")
              ),
+    UiAction("clip-reset-pitch-speed",
+             au::context::UiCtxAny,
+             au::context::CTX_ANY,
+             TranslatableString("action", "Reset pitch and speed"),
+             TranslatableString("action", "Reset pitch and speed")
+             ),
     UiAction("new-mono-track",
              au::context::UiCtxAny,
              au::context::CTX_ANY,
@@ -323,27 +350,6 @@ UiActionList STATIC_ACTIONS = {
              au::context::CTX_ANY,
              TranslatableString("action", "Add label"),
              TranslatableString("action", "Add label")
-             ),
-    UiAction("label-delete",
-             au::context::UiCtxProjectOpened,
-             au::context::CTX_ANY,
-             TranslatableString("action", "Delete label"),
-             TranslatableString("action", "Delete label"),
-             IconCode::Code::DELETE_TANK
-             ),
-    UiAction("label-cut",
-             au::context::UiCtxProjectOpened,
-             au::context::CTX_ANY,
-             TranslatableString("action", "Cut label"),
-             TranslatableString("action", "Cut label"),
-             IconCode::Code::CUT
-             ),
-    UiAction("label-copy",
-             au::context::UiCtxProjectOpened,
-             au::context::CTX_ANY,
-             TranslatableString("action", "Copy label"),
-             TranslatableString("action", "Copy label"),
-             IconCode::Code::COPY
              ),
     UiAction("trim-audio-outside-selection",
              au::context::UiCtxProjectOpened,
@@ -447,18 +453,19 @@ UiActionList STATIC_ACTIONS = {
              TranslatableString("action", "Previous item")
              ),
 
-    UiAction("track-view-next-track",
+    UiAction("track-view-above-item",
              au::context::UiCtxProjectFocused,
              au::context::CTX_PROJECT_FOCUSED,
-             TranslatableString("action", "Next track"),
-             TranslatableString("action", "Next track")
+             TranslatableString("action", "Above item"),
+             TranslatableString("action", "Above item")
              ),
-    UiAction("track-view-prev-track",
+    UiAction("track-view-below-item",
              au::context::UiCtxProjectFocused,
              au::context::CTX_PROJECT_FOCUSED,
-             TranslatableString("action", "Previous track"),
-             TranslatableString("action", "Previous track")
+             TranslatableString("action", "Below item"),
+             TranslatableString("action", "Below item")
              ),
+
     UiAction("track-view-first-track",
              au::context::UiCtxProjectFocused,
              au::context::CTX_PROJECT_FOCUSED,
@@ -520,7 +527,7 @@ void TrackeditUiActions::init()
                                                                                                                             format))))
               .toString();
         formatAction.uiCtx = context::UiCtxAny;
-        formatAction.scCtx = context::CTX_ANY;
+        formatAction.scCtx = context::CTX_DISABLED;
         formatAction.description = muse::TranslatableString("action", "Change track format");
         formatAction.title = muse::TranslatableString("action", "Change track format");
         formatAction.checkable = Checkable::Yes;
@@ -533,7 +540,7 @@ void TrackeditUiActions::init()
             = muse::actions::ActionQuery(muse::String(TRACK_RATE_CHANGE_ACTION).arg(muse::String::number(static_cast<int>(sampleRate)))).
               toString();
         rateAction.uiCtx = context::UiCtxAny;
-        rateAction.scCtx = context::CTX_ANY;
+        rateAction.scCtx = context::CTX_DISABLED;
         rateAction.description = muse::TranslatableString("action", "Change track sample rate");
         rateAction.title = muse::TranslatableString("action", "Change track sample rate");
         rateAction.checkable = Checkable::Yes;

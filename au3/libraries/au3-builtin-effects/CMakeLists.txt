@@ -53,8 +53,8 @@ set( SOURCES
 #   NoiseReductionBase.h
 #   NormalizeBase.cpp
 #   NormalizeBase.h
-   PaulstretchBase.cpp
-   PaulstretchBase.h
+#   PaulstretchBase.cpp
+#   PaulstretchBase.h
    PhaserBase.cpp
    PhaserBase.h
    PlotSpectrumBase.cpp
@@ -75,8 +75,6 @@ set( SOURCES
    SoundTouchBase.h
 #   StereoToMono.cpp # need some cleanups, commenting for now
 #   StereoToMono.h # need some cleanups, commenting for now
-   TimeScaleBase.cpp
-   TimeScaleBase.h
    ToneGenBase.cpp
    ToneGenBase.h
    TruncSilenceBase.cpp

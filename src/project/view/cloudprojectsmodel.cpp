@@ -3,10 +3,10 @@
 */
 #include "cloudprojectsmodel.h"
 
+#include "framework/global/async/asyncable.h"
 #include "framework/global/dataformatter.h"
 #include "framework/global/types/datetime.h"
 
-#include "au3cloud/cloudtypes.h"
 #include "project/types/projecttypes.h"
 
 using namespace muse;
@@ -23,29 +23,8 @@ CloudProjectsModel::CloudProjectsModel(QObject* parent)
 
 void CloudProjectsModel::load()
 {
-    auto onUserAuthorizedChanged = [this](bool authorized) {
-        if (authorized) {
-            setState(State::Loading);
-            loadItemsIfNecessary();
-        } else {
-            muse::actions::ActionQuery query("audacity://cloud/open-signin-dialog");
-            query.addParam("sync", muse::Val(false));
-            query.addParam("showTourPage", muse::Val(false));
-            dispatcher()->dispatch(query);
-
-            setState(State::NotSignedIn);
-        }
-    };
-
-    auto isAuthorized = [](au::au3cloud::AuthState authState) {
-        return std::holds_alternative<au::au3cloud::Authorized>(authState);
-    };
-
-    onUserAuthorizedChanged(isAuthorized(authorization()->authState().val));
-
-    authorization()->authState().ch.onReceive(this, [isAuthorized, onUserAuthorizedChanged](au::au3cloud::AuthState authState) {
-        onUserAuthorizedChanged(isAuthorized(std::move(authState)));
-    });
+    setState(State::Loading);
+    loadItemsIfNecessary();
 
     connect(this, &CloudProjectsModel::desiredRowCountChanged, this, &CloudProjectsModel::loadItemsIfNecessary);
 }
@@ -111,7 +90,7 @@ void CloudProjectsModel::loadItemsIfNecessary()
         return;
     }
 
-    if (m_state == State::Error || m_state == State::NotSignedIn) {
+    if (m_state == State::Error) {
         return;
     }
 
@@ -140,7 +119,7 @@ void CloudProjectsModel::loadItemsIfNecessary()
                                     .appendingComponent(item.name)
                                     .appendingSuffix(au::project::AUP4)
                                     .toQString();
-                    obj[SUFFIX_KEY] = QString::fromStdString(au::project::AUP4);
+                    obj[THUMBNAIL_URL_KEY] = obj[PATH_KEY];
                     obj[IS_CLOUD_KEY] = true;
                     obj[CLOUD_ITEM_ID_KEY] = QString::fromStdString(item.id);
                     obj[TIME_SINCE_MODIFIED_KEY]

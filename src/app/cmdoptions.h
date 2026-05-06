@@ -25,15 +25,16 @@ struct AudacityCmdOptions : public muse::CmdOptions {
         std::optional<QString> projectDisplayNameOverride;
         std::optional<QString> cloudProjectId;
         muse::io::paths_t mediaFiles;
+        bool removeMediaFilesAfterImport = false;
     } startup;
 
-    struct Autobot {
+    struct Testflow {
         QString testCaseNameOrFile;
         QString testCaseContextNameOrFile;
         QString testCaseContextValue;
         QString testCaseFunc;
         QString testCaseFuncArgs;
-    } autobot;
+    } testflow;
 
     struct AudioPluginRegistration {
         muse::io::path_t pluginPath;

@@ -100,6 +100,11 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/reverb/reverbeffect.h
     ${CMAKE_CURRENT_LIST_DIR}/reverb/reverbviewmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/reverb/reverbviewmodel.h
+
+    ${CMAKE_CURRENT_LIST_DIR}/paulstretch/paulstretcheffect.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/paulstretch/paulstretcheffect.h
+    ${CMAKE_CURRENT_LIST_DIR}/paulstretch/paulstretchviewmodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/paulstretch/paulstretchviewmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/tonegen/toneviewmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/tonegen/toneviewmodel.h
 
@@ -111,6 +116,13 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/silencegen/silencegenerator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/silencegen/silencegenerator.h
     ${CMAKE_CURRENT_LIST_DIR}/silencegen/silenceviewmodel.h
+
+    ${CMAKE_CURRENT_LIST_DIR}/slidingstretch/slidingstretcheffect.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/slidingstretch/slidingstretcheffect.h
+    ${CMAKE_CURRENT_LIST_DIR}/slidingstretch/slidingstretchviewmodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/slidingstretch/slidingstretchviewmodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/slidingstretch/slidingstretchsettingmodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/slidingstretch/slidingstretchsettingmodel.h
 
     ${CMAKE_CURRENT_LIST_DIR}/noisegen/noisegenerator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/noisegen/noisegenerator.h
@@ -164,7 +176,7 @@ set(MODULE_DEF ${MODULE_DEF}
     # -DNOTE_TRACK_API=
 )
 
-set(MODULE_LINK au3wrap)
+set(MODULE_LINK au3wrap libsbsms)
 set(MODULE_LINK_PUBLIC au3-effects au3-builtin-effects)
 
 set(MODULE_USE_UNITY OFF)

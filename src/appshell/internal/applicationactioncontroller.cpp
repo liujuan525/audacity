@@ -167,8 +167,16 @@ bool ApplicationActionController::eventFilter(QObject* watched, QEvent* event)
                 event->ignore();
                 return true;
             }
-            watched->deleteLater();
-            return false;
+            auto provider = multiwindowsProvider();
+            auto ctx = iocContext();
+            QMetaObject::invokeMethod(qApp, [provider, ctx]() {
+                // during the call the window and the context will be destroyed
+                // do not capture or use anything that is context-dependent here
+                // i.e. dont use Async::call(this instead of invokeMethod
+                provider->quitWindow(ctx);
+            }, Qt::QueuedConnection);
+            event->accept();
+            return true;
         }
         const bool accepted = quit();
         event->setAccepted(accepted);
@@ -238,14 +246,14 @@ bool ApplicationActionController::quit(const muse::io::path_t& installerPath)
 
 void ApplicationActionController::restart()
 {
-    if (projectFilesController()->closeOpenedProject()) {
-        // if (multiwindowsProvider()->instances().size() == 1) {
-        application()->restart();
-        // } else {
-        // multiwindowsProvider()->quitAllAndRestartLast();
+    if (projectFilesController()->closeOpenedProject(false)) {
+        if (multiwindowsProvider()->windowCount() == 1) {
+            application()->restart();
+        } else {
+            multiwindowsProvider()->quitAllAndRestartLast();
 
-        // QCoreApplication::exit();
-        // }
+            QCoreApplication::exit();
+        }
     }
 }
 
@@ -323,40 +331,47 @@ void ApplicationActionController::revertToFactorySettings()
 {
     std::string title = muse::trc("appshell", "Are you sure you want to revert to factory settings?");
     std::string question = muse::trc("appshell",
-                                     "This action will reset all your app preferences and delete all custom palettes and custom shortcuts. "
-                                     "The list of recent projects will also be cleared.\n\n"
+                                     "This action will reset all your app preferences and custom UI configurations. "
+                                     "It also deletes your custom workspaces and shortcuts. "
+                                     "You will also need to scan all third party plugins again.\n\n"
                                      "This action will not delete any of your projects.");
 
+    muse::IInteractive::ButtonData cancelBtn = interactive()->buttonData(muse::IInteractive::Button::Cancel);
+    cancelBtn.accent = true;
+
     int revertBtn = int(muse::IInteractive::Button::Apply);
-    muse::IInteractive::Result result = interactive()->warningSync(title, question,
-                                                                   { interactive()->buttonData(muse::IInteractive::Button::Cancel),
-                                                                     muse::IInteractive::ButtonData(revertBtn,
-                                                                                                    muse::trc("appshell", "Revert"),
-                                                                                                    true) },
-                                                                   revertBtn);
+    auto promise = interactive()->warning(title, question,
+                                          { cancelBtn,
+                                            muse::IInteractive::ButtonData(revertBtn, muse::trc("appshell", "Revert")) },
+                                          cancelBtn.btn, { muse::IInteractive::Option::WithIcon },
+                                          muse::trc("appshell", "Revert to factory settings"));
 
-    if (result.standardButton() == muse::IInteractive::Button::Cancel) {
-        return;
-    }
+    promise.onResolve(this, [this](const muse::IInteractive::Result& res) {
+        if (res.isButton(muse::IInteractive::Button::Cancel)) {
+            return;
+        }
 
-    static constexpr bool KEEP_DEFAULT_SETTINGS = false;
-    static constexpr bool NOTIFY_ABOUT_CHANGES = false;
-    configuration()->revertToFactorySettings(KEEP_DEFAULT_SETTINGS, NOTIFY_ABOUT_CHANGES);
+        static constexpr bool KEEP_DEFAULT_SETTINGS = false;
+        static constexpr bool NOTIFY_ABOUT_CHANGES = false;
+        static constexpr bool NOTIFY_OTHER_INSTANCES = false;
+        configuration()->revertToFactorySettings(KEEP_DEFAULT_SETTINGS, NOTIFY_ABOUT_CHANGES, NOTIFY_OTHER_INSTANCES);
 
-    title = muse::trc("appshell", "Would you like to restart Audacity now?");
-    question = muse::trc("appshell", "Audacity needs to be restarted for these changes to take effect.");
+        std::string title = muse::trc("appshell", "Would you like to restart Audacity now?");
+        std::string question = muse::trc("appshell", "Audacity needs to be restarted for these changes to take effect.");
 
-    int restartBtn = int(muse::IInteractive::Button::Apply);
-    result = interactive()->questionSync(title, question,
-                                         { interactive()->buttonData(muse::IInteractive::Button::Cancel),
-                                           muse::IInteractive::ButtonData(restartBtn, muse::trc("appshell", "Restart"), true) },
-                                         restartBtn);
+        int restartBtn = int(muse::IInteractive::Button::Apply);
+        auto promise = interactive()->question(title, question,
+                                               { interactive()->buttonData(muse::IInteractive::Button::Cancel),
+                                                 muse::IInteractive::ButtonData(restartBtn,
+                                                                                muse::trc("appshell", "Restart"), true) },
+                                               restartBtn);
 
-    if (result.standardButton() == muse::IInteractive::Button::Cancel) {
-        return;
-    }
-
-    restart();
+        promise.onResolve(this, [this](const muse::IInteractive::Result& res) {
+            if (!res.isButton(muse::IInteractive::Button::Cancel)) {
+                restart();
+            }
+        });
+    });
 }
 
 bool ApplicationActionController::isProjectOpened() const
@@ -431,9 +446,9 @@ void ApplicationActionController::doGlobalCancel()
 {
     if (isProjectOpenedAndFocused()) {
         dispatcher()->dispatch("action://trackedit/cancel");
-    } else {
-        dispatcher()->dispatch("nav-escape");
     }
+
+    dispatcher()->dispatch("nav-escape");
 }
 
 void ApplicationActionController::doGlobalTrigger()

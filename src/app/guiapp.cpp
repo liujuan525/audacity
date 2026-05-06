@@ -88,6 +88,7 @@ void GuiApp::doStartupScenario(const muse::modularity::ContextPtr& ctxId)
     startupScenario->setStartupType(options->startup.type);
     startupScenario->setStartupProjectFile(projectFile);
     startupScenario->setStartupMediaFiles(options->startup.mediaFiles);
+    startupScenario->setRemoveMediaFilesAfterImport(options->startup.removeMediaFilesAfterImport);
 
     startupScenario->runOnSplashScreen();
 
@@ -111,6 +112,6 @@ void GuiApp::applyCommandLineOptions(const std::shared_ptr<muse::CmdOptions>& op
     }
 
     if (options->app.revertToFactorySettings) {
-        appshellConfiguration()->revertToFactorySettings(options->app.revertToFactorySettings.value());
+        appshellConfiguration()->revertToFactorySettings();
     }
 }

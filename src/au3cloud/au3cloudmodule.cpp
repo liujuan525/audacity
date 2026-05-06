@@ -16,7 +16,7 @@
 #include "internal/au3cloudactionscontroller.h"
 #include "internal/clouduiactions.h"
 
-#include "view/accountinfomodel.h"
+#include "view/accountmodel.h"
 #include "dev/cloudtestsmodel.h"
 
 using namespace au::au3cloud;
@@ -41,12 +41,17 @@ void Au3CloudModule::registerExports()
 void Au3CloudModule::onInit(const muse::IApplication::RunMode&)
 {
     m_cloudService->init();
+    m_cloudConfiguration->init();
+}
+
+void Au3CloudModule::onDeinit()
+{
 }
 
 void Au3CloudModule::registerUiTypes()
 {
     qmlRegisterType<CloudTestsModel>("Audacity.Cloud", 1, 0, "CloudTestsModel");
-    qmlRegisterType<AccountInfoModel>("Audacity.Cloud", 1, 0, "AccountInfoModel");
+    qmlRegisterType<AccountModel>("Audacity.Cloud", 1, 0, "AccountModel");
 }
 
 muse::modularity::IContextSetup* Au3CloudModule::newContext(const muse::modularity::ContextPtr& ctx) const
@@ -78,4 +83,9 @@ void Au3CloudContext::onInit(const muse::IApplication::RunMode&)
     }
 }
 
-void Au3CloudContext::onDeinit() {}
+void Au3CloudContext::onDeinit()
+{
+    if (m_audioComService) {
+        m_audioComService->deinit();
+    }
+}

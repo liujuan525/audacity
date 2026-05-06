@@ -6,12 +6,16 @@
 #include "spectrogram/spectrogramtypes.h"
 #include "trackedit/dom/track.h"
 #include "framework/global/translation.h"
+#include "global/realfn.h"
 
 using namespace au::projectscene;
 using namespace muse::uicomponents;
 using namespace muse::actions;
 
 static const ActionCode ENABLE_STRETCH_CODE("stretch-clip-to-match-tempo");
+static const ActionCode RENDER_PITCH_SPEED_CODE("clip-render-pitch-speed");
+static const ActionCode RESET_PITCH_SPEED_CODE("clip-reset-pitch-speed");
+static const ActionCodeList PITCH_SPEED_CODES { RENDER_PITCH_SPEED_CODE, RESET_PITCH_SPEED_CODE };
 
 namespace {
 //! NOTE: can be moved to the framework
@@ -39,7 +43,31 @@ void ClipContextMenuModel::load()
     auto enableStretchItem = makeItemWithArg(ENABLE_STRETCH_CODE);
     updateStretchEnabledState(*enableStretchItem);
 
+    auto renderPitchSpeedItem = makeItemWithArg(RENDER_PITCH_SPEED_CODE);
+    updatePitchSpeedModifiedEnabledState(*renderPitchSpeedItem);
+
+    auto resetPitchSpeedItem = makeItemWithArg(RESET_PITCH_SPEED_CODE);
+    updatePitchSpeedModifiedEnabledState(*resetPitchSpeedItem);
+
     auto colorItems = makeClipColourItems();
+
+    MenuItemList cutAndItems {
+        makeMenuItem("cut-leave-gap",
+                     muse::TranslatableString("clip", "Cut and leave gap")),
+        makeMenuItem("cut-per-track-ripple",
+                     muse::TranslatableString("clip", "Cut and close gap on this track")),
+        makeMenuItem("cut-all-tracks-ripple",
+                     muse::TranslatableString("clip", "Cut and close gap on all tracks")),
+    };
+
+    MenuItemList deleteAndItems {
+        makeMenuItem("delete-leave-gap",
+                     muse::TranslatableString("clip", "Delete and leave gap")),
+        makeMenuItem("delete-per-track-ripple",
+                     muse::TranslatableString("clip", "Delete and close gap on this track")),
+        makeMenuItem("delete-all-tracks-ripple",
+                     muse::TranslatableString("clip", "Delete and close gap on all tracks")),
+    };
 
     MenuItemList items {
         makeItemWithArg("clip-properties"),
@@ -48,16 +76,19 @@ void ClipContextMenuModel::load()
         makeSeparator(),
         makeItemWithArg("action://trackedit/cut"),
         makeItemWithArg("action://trackedit/copy"),
-        makeItemWithArg("action://delete"),
         makeItemWithArg("duplicate"),
+        makeItemWithArg("action://trackedit/delete"),
+        makeSeparator(),
+        makeMenu(muse::TranslatableString("clip", "Cut and…"), cutAndItems, "menu-cut-and"),
+        makeMenu(muse::TranslatableString("clip", "Delete and…"), deleteAndItems, "menu-delete-and"),
         makeSeparator(),
         makeItemWithArg("split"),
-        makeSeparator(),
         makeItemWithArg("clip-export"),
         makeSeparator(),
         enableStretchItem,
         makeItemWithArg("clip-pitch-speed-open"),
-        makeItemWithArg("clip-render-pitch-speed"),
+        resetPitchSpeedItem,
+        renderPitchSpeedItem,
     };
 
     const auto project = globalContext()->currentProject();
@@ -127,6 +158,13 @@ void ClipContextMenuModel::onActionsStateChanges(const muse::actions::ActionCode
         updateStretchEnabledState(item);
     }
 
+    if (containsAny(codes, PITCH_SPEED_CODES)) {
+        for (const auto& code : PITCH_SPEED_CODES) {
+            MenuItem& item = findItem(ActionCode(code));
+            updatePitchSpeedModifiedEnabledState(item);
+        }
+    }
+
     if (containsAny(codes, m_colorChangeActionCodeList)) {
         updateColorCheckedState();
     }
@@ -144,6 +182,23 @@ void ClipContextMenuModel::updateStretchEnabledState(MenuItem& item)
     }
     auto state = item.state();
     state.checked = clip.stretchToMatchTempo;
+    item.setState(state);
+}
+
+void ClipContextMenuModel::updatePitchSpeedModifiedEnabledState(MenuItem& item)
+{
+    project::IAudacityProjectPtr project = globalContext()->currentProject();
+    if (!project) {
+        return;
+    }
+    auto clip = project->trackeditProject()->clip(m_clipKey.key);
+    if (!clip.isValid()) {
+        return;
+    }
+
+    const bool hasPitchOrSpeed = clip.pitch != 0 || !muse::RealIsEqual(clip.speed, 1.0);
+    auto state = item.state();
+    state.enabled = state.enabled && hasPitchOrSpeed;
     item.setState(state);
 }
 

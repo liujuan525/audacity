@@ -195,6 +195,30 @@ static UiActionList STATIC_ACTIONS = {
              TranslatableString("action", "Move play cursor right"),
              TranslatableString("action", "Move play cursor right")
              ),
+    UiAction("sel-ext-left",
+             au::context::UiCtxProjectOpened,
+             muse::shortcuts::CTX_PROJECT_OPENED,
+             TranslatableString("action", "Extend selection left"),
+             TranslatableString("action", "Extend selection left")
+             ),
+    UiAction("sel-ext-right",
+             au::context::UiCtxProjectOpened,
+             muse::shortcuts::CTX_PROJECT_OPENED,
+             TranslatableString("action", "Extend selection right"),
+             TranslatableString("action", "Extend selection right")
+             ),
+    UiAction("sel-cntr-left",
+             au::context::UiCtxProjectOpened,
+             muse::shortcuts::CTX_PROJECT_OPENED,
+             TranslatableString("action", "Contract selection from left"),
+             TranslatableString("action", "Contract selection from left")
+             ),
+    UiAction("sel-cntr-right",
+             au::context::UiCtxProjectOpened,
+             muse::shortcuts::CTX_PROJECT_OPENED,
+             TranslatableString("action", "Contract selection from right"),
+             TranslatableString("action", "Contract selection from right")
+             ),
     UiAction("clip-pitch-speed",
              au::context::UiCtxAny,
              au::context::CTX_ANY,
@@ -273,7 +297,7 @@ void ProjectSceneUiActions::init()
         UiAction trackColorAction;
         trackColorAction.code = muse::actions::ActionQuery(makeTrackColorChangeAction(info.index)).toString();
         trackColorAction.uiCtx = context::UiCtxProjectOpened;
-        trackColorAction.scCtx = context::CTX_PROJECT_FOCUSED;
+        trackColorAction.scCtx = context::CTX_DISABLED;
         trackColorAction.description = muse::TranslatableString("action", "Change track color");
         trackColorAction.title = muse::TranslatableString("action", "Change track color");
         trackColorAction.iconCode = IconCode::Code::FRETBOARD_MARKER_CIRCLE_FILLED;

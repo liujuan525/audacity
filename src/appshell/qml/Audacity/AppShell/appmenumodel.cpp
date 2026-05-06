@@ -455,8 +455,8 @@ muse::uicomponents::MenuItem* AppMenuModel::makeDiagnosticMenu()
             makeMenuItem("diagnostic-accessible-tree-dump"),
         };
 
-        MenuItemList autobotItems {
-            makeMenuItem("autobot-show-scripts"),
+        MenuItemList testflowItems {
+            makeMenuItem("testflow-show-scripts"),
         };
 
         MenuItemList extensionsItems {
@@ -466,7 +466,7 @@ muse::uicomponents::MenuItem* AppMenuModel::makeDiagnosticMenu()
         items << makeMenu(TranslatableString("appshell/menu/diagnostics", "A&ctions"), actionsItems, "menu-actions")
               << makeMenu(TranslatableString("appshell/menu/diagnostics", "&Accessibility"), accessibilityItems, "menu-accessibility")
               << makeMenu(TranslatableString("appshell/menu/diagnostics", "E&xtensions"), extensionsItems, "menu-extensions")
-              << makeMenu(TranslatableString("appshell/menu/diagnostics", "Auto&bot"), autobotItems, "menu-autobot");
+              << makeMenu(TranslatableString("appshell/menu/diagnostics", "Test&flow"), testflowItems, "menu-testflow");
         //! TODO AU4
         // << makeMenuItem("multiwindows-dev-show-info");
     }
@@ -552,29 +552,8 @@ MenuItemList AppMenuModel::makeLabelItems()
     MenuItemList items {
         makeMenuItem("label-add"),
         makeMenuItem("paste-new-label"),
-        makeMenu(TranslatableString("appshell/menu/audio-actions", "Audio actions across labels"),
-                 makeAudioActionsItems(), "menu-audio-actions", false),
         makeSeparator(),
         makeMenuItem("manage-labels"),
-    };
-
-    return items;
-}
-
-MenuItemList AppMenuModel::makeAudioActionsItems()
-{
-    MenuItemList items {
-        makeMenuItem("cut-labels"),
-        makeMenuItem("split-cut-labels"),
-        makeMenuItem("copy-labels"),
-        makeMenuItem("delete-labels"),
-        makeMenuItem("split-delete-labels"),
-        makeSeparator(),
-        makeMenuItem("split-labels"),
-        makeMenuItem("join-labels"),
-        makeSeparator(),
-        makeMenuItem("silence-labels"),
-        makeMenuItem("disjoin-labels"),
     };
 
     return items;
@@ -725,11 +704,11 @@ MenuItemList AppMenuModel::makeDiagnosticsItems()
         items << makeMenu(TranslatableString("appshell/menu/diagnostic", "&Accessibility"), accessibilityItems, "menu-accessibility");
 #endif
 
-#ifdef MUSE_MODULE_AUTOBOT
-        MenuItemList autobotItems {
-            makeMenuItem("autobot-show-scripts"),
+#ifdef MUSE_MODULE_TESTFLOW
+        MenuItemList testflowItems {
+            makeMenuItem("testflow-show-scripts"),
         };
-        items << makeMenu(TranslatableString("appshell/menu/diagnostic", "Auto&bot"), autobotItems, "menu-autobot");
+        items << makeMenu(TranslatableString("appshell/menu/diagnostic", "Test&flow"), testflowItems, "menu-testflow");
 #endif
 
 #ifdef MUSE_MODULE_MULTIWINDOWS
@@ -822,7 +801,7 @@ muse::uicomponents::MenuItem* AppMenuModel::makeMenuEffect(const muse::String& t
 MenuItemList AppMenuModel::makeEffectsItems()
 {
     MenuItemList items {
-        makeMenuItem("effect-plugin-manager"),
+        makeMenuItem("plugin-manager"),
         makeMenuItem("add-realtime-effects"),
         makeSeparator(),
         makeMenuItem("repeat-last-effect"),
@@ -840,7 +819,7 @@ MenuItemList AppMenuModel::makeEffectsItems()
 MenuItemList AppMenuModel::makeGeneratorItems()
 {
     MenuItemList items {
-        makeMenuItem("generate-plugin-manager"),
+        makeMenuItem("plugin-manager"),
         makeSeparator(),
     };
 
@@ -855,7 +834,7 @@ MenuItemList AppMenuModel::makeGeneratorItems()
 MenuItemList AppMenuModel::makeToolItems()
 {
     MenuItemList items {
-        makeMenuItem("tools-plugin-manager"),
+        makeMenuItem("plugin-manager"),
         makeSeparator(),
         makeMenuItem("manage-macros"),
         makeMenu(TranslatableString("appshell/menu/macros", "&Macros"), makeMacrosItems(), "menu-macros", false),
@@ -881,11 +860,10 @@ MenuItemList AppMenuModel::makeToolItems()
 MenuItemList AppMenuModel::makeAnalyzeItems()
 {
     MenuItemList items {
-        makeMenuItem("analyze-plugin-manager"),
+        makeMenuItem("plugin-manager"),
         makeSeparator(),
         makeMenuItem("contrast-analyzer"),
         makeMenuItem("plot-spectrum"),
-        makeMenuItem("analyzer-omitted"),
         makeSeparator(),
     };
 

@@ -31,12 +31,14 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/internal/au3cloudservice.h
     ${CMAKE_CURRENT_LIST_DIR}/internal/oauthhttpserverreplyhandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/internal/oauthhttpserverreplyhandler.h
+    ${CMAKE_CURRENT_LIST_DIR}/internal/au3audiocomtypeconv.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/internal/au3audiocomtypeconv.h
+    ${CMAKE_CURRENT_LIST_DIR}/internal/downloadmanager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/internal/downloadmanager.h
 
-    ${CMAKE_CURRENT_LIST_DIR}/view/accountinfomodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/accountinfomodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/view/accountmodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/view/accountmodel.h
     )
-
-set(MODULE_INCLUDE ${AU3_LIBRARIES})
 
 set(MODULE_LINK au3wrap Qt6::Network Qt6::NetworkAuth)
 
